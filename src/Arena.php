@@ -29,6 +29,53 @@ class Arena
         return $this->getDistance($attacker, $defenser) <= $attacker->getRange();
     }
 
+    public function move(Fighter $fighter, string $direction): void
+    {
+        $x = $fighter->getX();
+        $y = $fighter->getY();
+
+        if($direction === 'N') $y--;
+        else if($direction === 'S') $y++;
+        else if($direction === 'W') $x--;
+        else if($direction === 'E') $x++;
+
+        if(
+            $x < 0 || $x > 9 || $y < 0 || $y > 9
+        ) {
+            throw new Exception("Vous quittez la zone de mission !");
+        }
+
+        $monsters = $this->getMonsters();
+        foreach($monsters as $monster) {
+            if(
+                $monster->getX() == $x
+                && $monster->getY() == $y) {
+                    throw new Exception("Vous ne pouvez pas chevaucher un monstre !");
+                }
+        }
+
+        $fighter->setX($x);
+        $fighter->setY($y);
+
+    }
+
+    public function battle(int $id): void
+    {
+        $monster = $this->monsters[$id];
+        $hero = $this->hero;
+
+        if($this->touchable($hero, $monster))
+            $hero->fight($monster);
+
+        if(!$monster->isAlive()) {
+            unset($this->monsters[$id]);
+            return;
+        }
+
+        if($this->touchable($monster, $hero))
+            $monster->fight($hero);
+    }
+
     /**
      * Get the value of monsters
      */ 
